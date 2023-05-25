@@ -2,6 +2,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:programmation_mobile/models/city.dart';
 import 'package:programmation_mobile/services/weather_service.dart';
 
+
 // Event
 // Define the abstract class for city search events
 abstract class CitySearchEvent {}
@@ -38,23 +39,16 @@ class CitySearchFailure extends CitySearchState {}
 class CitySearchBloc extends Bloc<CitySearchEvent, CitySearchState> {
   final WeatherService weatherService;
 
-  // The initial state is CitySearchInitial
   CitySearchBloc({required this.weatherService})
-      : super(CitySearchInitial());
-
-  @override
-  Stream<CitySearchState> mapEventToState(CitySearchEvent event) async* {
-    // If the event is CitySearchRequested, load the city search
-    if (event is CitySearchRequested) {
-      yield CitySearchLoading();
+      : super(CitySearchInitial()) {
+    on<CitySearchRequested>((event, emit) async {
+      emit(CitySearchLoading());
       try {
-        // Call the weather service to get the city search
         final cities = await weatherService.searchCities(event.cityName);
-        yield CitySearchSuccess(cities: cities);
+        emit(CitySearchSuccess(cities: cities));
       } catch (_) {
-        // If an error occurs, emit CitySearchFailure
-        yield CitySearchFailure();
+        emit(CitySearchFailure());
       }
-    }
+    });
   }
 }
