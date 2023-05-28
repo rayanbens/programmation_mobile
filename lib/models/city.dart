@@ -1,15 +1,32 @@
-// The City class represents a city with a name attribute
+import 'package:programmation_mobile/models/weather_brief.dart';
+
 class City {
-  final String name;
+  City({
+    required this.id,
+    required this.name,
+    required this.country,
+    required this.latitude,
+    required this.longitude,
+    this.weather,
+  });
 
-  // The constructor for City requires a name
-  City({required this.name});
-
-  // This factory constructor allows creating a City instance from a JSON object
   factory City.fromJson(Map<String, dynamic> json) {
-    // The name is expected to be a string in the JSON object
     return City(
+      id: json['id'],
       name: json['name'],
+      country: json['country'],
+      latitude: json['latitude'],
+      longitude: json['longitude'],
+      weather: json['weather'] != null
+          ? BriefWeather.fromJson(json['weather'])
+          : null,
     );
   }
+
+  final int id;
+  final String name;
+  final String country;
+  final double latitude;
+  final double longitude;
+  BriefWeather? weather;
 }

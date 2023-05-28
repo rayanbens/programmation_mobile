@@ -1,9 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:programmation_mobile/services/weather_service.dart';
 import 'package:programmation_mobile/models/city.dart';
-import 'package:programmation_mobile/models/weather.dart';
 
-// Event
+import '../models/weather.dart';
+
 abstract class CityDetailEvent {}
 
 class CityDetailLoad extends CityDetailEvent {
@@ -25,24 +27,28 @@ class CityDetailSuccess extends CityDetailState {
   CityDetailSuccess({required this.weather});
 }
 
-class CityDetailFailure extends CityDetailState {}
+class CityDetailFailure extends CityDetailState {
+}
 
 // Bloc
 class CityDetailBloc extends Bloc<CityDetailEvent, CityDetailState> {
-  final WeatherService weatherService;
+  final WeatherService weatherService = WeatherService();
 
-  CityDetailBloc({required this.weatherService})
-      : super(CityDetailInitial());
+  CityDetailBloc() : super(CityDetailInitial()) {
+    on<CityDetailLoad>(_mapEventToState);
+  }
 
-  @override
-  Stream<CityDetailState> mapEventToState(CityDetailEvent event) async* {
+  Future<void> _mapEventToState(
+      CityDetailEvent event, Emitter<CityDetailState> emit) async {
     if (event is CityDetailLoad) {
-      yield CityDetailLoading();
+      emit(CityDetailLoading());
       try {
-        final weather = await weatherService.getWeather(event.city.name);
-        yield CityDetailSuccess(weather: weather);
-      } catch (_) {
-        yield CityDetailFailure();
+        final weather = await weatherService.getWeather(
+            latitude: event.city.latitude, longitude: event.city.longitude);
+        emit(CityDetailSuccess(weather: weather));
+      } catch (e) {
+        log('Error while loading weather $e');
+        emit(CityDetailFailure());
       }
     }
   }

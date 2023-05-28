@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:programmation_mobile/models/city.dart';
 import 'package:programmation_mobile/services/weather_service.dart';
@@ -37,14 +39,15 @@ class CitySearchFailure extends CitySearchState {}
 // Bloc
 // CitySearchBloc reacts to CitySearchEvent and emit CitySearchState
 class CitySearchBloc extends Bloc<CitySearchEvent, CitySearchState> {
-  final WeatherService weatherService;
+  final WeatherService weatherService = WeatherService();
 
-  CitySearchBloc({required this.weatherService})
+  CitySearchBloc()
       : super(CitySearchInitial()) {
     on<CitySearchRequested>((event, emit) async {
       emit(CitySearchLoading());
       try {
-        final cities = await weatherService.searchCities(event.cityName);
+        final cities = await weatherService.citySearch(event.cityName);
+        // log('MK: cities are ${cities.map((e) => e.name)}');
         emit(CitySearchSuccess(cities: cities));
       } catch (_) {
         emit(CitySearchFailure());
